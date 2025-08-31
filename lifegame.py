@@ -159,25 +159,36 @@ class LifeGame:
 
                 # --- Update and Draw ---
                 if not self.paused:
-                    update_status("Redrawing changed cells")
-                    # Reset highlights from the previous frame before calculating the next step
-                    self.reset_highlights()
-                    
+                    # Wait 3 seconds on the black and white view
+                    update_status(f"Displaying Gen {self.generation}")
+                    time.sleep(3.0)
+
+                    # Check for input again during the long wait
+                    if keyboard.readinto(temp_key_buffer): continue
+
+                    # Calculate and draw highlights
                     update_status("Calculating next generation")
                     self.step()
                     
                     update_status("Drawing highlights")
-                    # Draw new highlights for this frame
                     self.draw_highlights()
+
+                    # Wait 1 second on the highlighted view
+                    update_status("Displaying highlights")
+                    time.sleep(1.0)
+
+                    # Finalize the generation by resetting highlights to normal colors
+                    update_status("Finalizing generation display")
+                    self.reset_highlights()
                 
                 # --- Display Status ---
                 if self.paused:
                     paused_text = f"PAUSED (Gen: {self.generation}) | P:Resume Q:Quit"
                     terminal.wr(f"\x1b[40;1H\x1b[K{paused_text}")
+                    time.sleep(0.1) # Add a small delay in paused state to reduce CPU usage
                 else:
-                    update_status("Waiting for next step...")
-
-                time.sleep(0.01)
+                    # This status is shown before the 3-second wait of the next cycle
+                    update_status(f"End of Gen {self.generation}")
 
         finally:
             # --- Cleanup ---
