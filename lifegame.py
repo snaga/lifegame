@@ -28,7 +28,7 @@ class LifeGame:
     """
     Manages the Game of Life simulation.
     """
-    def __init__(self, width, height):
+    def __init__(self, width=GRID_WIDTH, height=GRID_HEIGHT):
         self.width = width
         self.height = height
         # Use two buffers for the grid to calculate the next state
@@ -37,6 +37,7 @@ class LifeGame:
         self.randomize_grid()
         self.paused = False
         self.running = True
+        self.generation = 0
 
     def _create_grid(self):
         """Creates a 1D bytearray for the grid for memory efficiency."""
@@ -50,6 +51,7 @@ class LifeGame:
     @micropython.native
     def step(self):
         """Calculates the next generation of the grid."""
+        self.generation += 1
         for y in range(self.height):
             for x in range(self.width):
                 # Count live neighbors
@@ -138,6 +140,12 @@ class LifeGame:
         try:
             temp_key_buffer = bytearray(1)
             while self.running:
+                # Helper function to display status
+                def update_status(process_name):
+                    # \x1b[40;1H -> Move to line 40, col 1. \x1b[K -> Clear line.
+                    status_text = f"Gen: {self.generation}, Status: {process_name}"
+                    terminal.wr(f"\x1b[40;1H\x1b[K{status_text}")
+
                 # Check for user input
                 if keyboard.readinto(temp_key_buffer):
                     key_char = chr(temp_key_buffer[0])
@@ -151,20 +159,23 @@ class LifeGame:
 
                 # --- Update and Draw ---
                 if not self.paused:
+                    update_status("Redrawing changed cells")
                     # Reset highlights from the previous frame before calculating the next step
                     self.reset_highlights()
                     
+                    update_status("Calculating next generation")
                     self.step()
                     
+                    update_status("Drawing highlights")
                     # Draw new highlights for this frame
                     self.draw_highlights()
                 
                 # --- Display Status ---
                 if self.paused:
-                    terminal.wr("\x1b[40;1H\x1b[KPAUSED | P: Resume, Q: Quit")
+                    paused_text = f"PAUSED (Gen: {self.generation}) | P:Resume Q:Quit"
+                    terminal.wr(f"\x1b[40;1H\x1b[K{paused_text}")
                 else:
-                    # Clear the status line when running
-                    terminal.wr("\x1b[40;1H\x1b[K")
+                    update_status("Waiting for next step...")
 
                 time.sleep(0.01)
 
