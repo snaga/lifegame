@@ -143,7 +143,7 @@ class LifeGame:
                 # Helper function to display status
                 def update_status(process_name):
                     # \x1b[40;1H -> Move to line 40, col 1. \x1b[K -> Clear line.
-                    status_text = f"Gen: {self.generation}, Status: {process_name}"
+                    status_text = f"Gen: {self.generation}, {process_name}"
                     terminal.wr(f"\x1b[40;1H\x1b[K{status_text}")
 
                 # Check for user input
