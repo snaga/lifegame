@@ -159,9 +159,9 @@ class LifeGame:
 
                 # --- Update and Draw ---
                 if not self.paused:
-                    # Wait 3 seconds on the black and white view
+                    # Wait 5 seconds on the black and white view
                     update_status(f"Displaying Gen {self.generation}")
-                    time.sleep(3.0)
+                    time.sleep(5.0)
 
                     # Check for input again during the long wait
                     if keyboard.readinto(temp_key_buffer): continue
